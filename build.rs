@@ -16,6 +16,8 @@ fn main() {
         .allowlist_function("MNN.*")
         .allowlist_var("MNN.*")
         .allowlist_type("MNN.*")
+        // 生成 Rust 代码中的构造函数
+        .opaque_type("std::.*")
         .generate_comments(false)
         .layout_tests(false) // 关闭结构体测试#[test]
         .generate()

@@ -36,19 +36,19 @@ pub enum BackendExtra {
 }
 // 创建一个 Rust 友好的配置结构体
 pub struct SessionConfig {
-    memory: Memory,
-    power: Power,
-    precision: Precision,
-    forward_type: ForwardType,
-    num_threads: i32,
-    backend_extra: BackendExtra,
+    pub memory: Memory,
+    pub power: Power,
+    pub precision: Precision,
+    pub forward_type: ForwardType,
+    pub num_threads: i32,
+    pub backend_extra: BackendExtra,
 }
 
 impl Default for SessionConfig {
     fn default() -> Self {
         SessionConfig {
-            memory: Memory::Normal,
-            power: Power::Normal,
+            memory: Memory::Low,
+            power: Power::High,
             precision: Precision::High,
             forward_type: ForwardType::CPU,
             num_threads: 4,
@@ -57,68 +57,6 @@ impl Default for SessionConfig {
     }
 }
 
-use std::marker::PhantomData;
-
-// #[repr(C)]
-// pub struct StdVector<T> {
-//     __begin_: *mut T,
-//     __end_: *mut T,
-//     __end_cap_: *mut T,
-//     _phantom: PhantomData<T>,
-// }
-
-// impl<T> StdVector<T> {
-//     pub fn new() -> Self {
-//         // 这里我们创建一个空的 StdVector
-//         // 注意：这只是一个示例，实际上可能需要通过 FFI 调用 C++ 的 vector 构造函数
-//         StdVector {
-//             __begin_: std::ptr::null_mut(),
-//             __end_: std::ptr::null_mut(),
-//             __end_cap_: std::ptr::null_mut(),
-//             _phantom: PhantomData,
-//         }
-//     }
-
-//     // 其他方法...
-// }
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct std_allocator_traits {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct std___compressed_pair {
-    pub _address: u8,
-}
-
-pub type std_vector___alloc_traits = std_allocator_traits;
-pub type std_vector_pointer = std_vector___alloc_traits;
-
-#[derive(Debug)]
-struct std_vector {
-    pub __begin_: std_vector_pointer,
-    pub __end_: std_vector_pointer,
-    pub __end_cap_: std___compressed_pair,
-}
-use std::mem::MaybeUninit;
-impl Default for std_vector {
-    fn default() -> Self {
-        // 创建一个未初始化的 std_vector
-        let mut vector: MaybeUninit<std_vector> = MaybeUninit::uninit();
-
-        unsafe {
-            // 调用 C++ 的 std::vector 默认构造函数
-            extern "C" {
-                fn std_vector_default_constructor(vector: *mut std_vector);
-            }
-            std_vector_default_constructor(vector.as_mut_ptr());
-
-            // 假设构造函数成功，我们现在可以安全地假定 vector 已经被初始化
-            vector.assume_init()
-        }
-    }
-}
 impl SessionConfig {
     // 转换为 C++ 需要的 MNN_ScheduleConfig 和 MNN_BackendConfig
     pub unsafe fn to_mnn_config(&self) -> MNN_ScheduleConfig {
@@ -149,11 +87,7 @@ impl SessionConfig {
         };
 
         let schedule_config = MNN_ScheduleConfig {
-            saveTensors: mnn_bind::std_vector {
-                __begin_: mnn_bind::std_allocator_traits { _address: 0 },
-                __end_: mnn_bind::std_allocator_traits { _address: 0 },
-                __end_cap_: mnn_bind::std___compressed_pair { _address: 0 },
-            },
+            saveTensors: [0; 3],
             type_: match self.forward_type {
                 ForwardType::CPU => MNNForwardType_MNN_FORWARD_CPU,
                 ForwardType::AUTO => MNNForwardType_MNN_FORWARD_AUTO,
@@ -167,16 +101,8 @@ impl SessionConfig {
                 numThread: self.num_threads,
             },
             path: MNN_ScheduleConfig_Path {
-                inputs: mnn_bind::std_vector {
-                    __begin_: mnn_bind::std_allocator_traits { _address: 0 },
-                    __end_: mnn_bind::std_allocator_traits { _address: 0 },
-                    __end_cap_: mnn_bind::std___compressed_pair { _address: 0 },
-                },
-                outputs: mnn_bind::std_vector {
-                    __begin_: mnn_bind::std_allocator_traits { _address: 0 },
-                    __end_: mnn_bind::std_allocator_traits { _address: 0 },
-                    __end_cap_: mnn_bind::std___compressed_pair { _address: 0 },
-                },
+                inputs: [0; 3],
+                outputs: [0; 3],
                 mode: MNN_ScheduleConfig_Path_Mode_Op, // 默认
             },
             backupType: match self.forward_type {
