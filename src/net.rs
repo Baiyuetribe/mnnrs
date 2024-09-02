@@ -15,6 +15,7 @@ impl Net {
             ptr: std::ptr::null_mut(),
         }
     }
+    // 模型加载
     pub fn load_model(&mut self, model_path: &str) -> anyhow::Result<()> {
         let c_str = CString::new(model_path)?;
         unsafe {
@@ -22,11 +23,29 @@ impl Net {
         }
         Ok(())
     }
-
+    // 创建session
     pub fn create_session(&self, session_cfg: &MNN_ScheduleConfig) -> anyhow::Result<Session> {
         let ptr = unsafe { MNN_Interpreter_createSession(self.ptr, session_cfg) };
         Ok(Session { ptr })
     }
+    // 获取输入张量
+    pub fn get_input_tensor(&self, session: &*mut MNN_Session, name: &str) -> *mut MNN_Tensor {
+        let c_str = CString::new(name).unwrap();
+        unsafe { MNN_Interpreter_getSessionInput(self.ptr, session.clone(), c_str.as_ptr()) }
+    }
+    // 获取输出张量
+    pub fn get_output_tensor(&self, session: &*mut MNN_Session, name: &str) -> *mut MNN_Tensor {
+        let c_str = CString::new(name).unwrap();
+        unsafe { MNN_Interpreter_getSessionOutput(self.ptr, session.clone(), c_str.as_ptr()) }
+    }
+
+    // 推理
+    pub fn run_session(&self, session: &*mut MNN_Session) {
+        unsafe {
+            MNN_Interpreter_runSession(self.ptr, session.clone());
+        }
+    }
+
     pub fn release_session(&self, session: &mut Session) {
         unsafe {
             MNN_Interpreter_releaseSession(self.ptr, session.ptr);
@@ -44,7 +63,7 @@ impl Drop for Net {
 }
 
 pub struct Session {
-    ptr: *mut MNN_Session,
+    pub ptr: *mut MNN_Session,
 }
 impl Session {
     // 添加会话相关的方法
