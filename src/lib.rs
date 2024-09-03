@@ -8,8 +8,10 @@ mod mnn_bind {
 
 use std::ffi::CStr;
 mod config;
+mod mat;
 mod net; // 引入
 pub use config::*;
+pub use mat::*;
 pub use net::*; // 对外开发 // 对外开发
 
 pub fn version() -> &'static str {
