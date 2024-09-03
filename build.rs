@@ -3,8 +3,11 @@ use std::path::PathBuf;
 
 fn main() {
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let mnn_inclued_dir =
-        std::path::PathBuf::from("/Users/baiyue/arch/auto_action/pkg/mnn/arm64/include");
+    let mnn_include_dir = env::var("MNN_INCLUDE_DIR")
+        .map(|dir| PathBuf::from(dir))
+        .expect(
+            "ERROR: please set NNN_INCLUDE_DIR,e.g. export MNN_INCLUDE_DIR=/path/to/mnn/include",
+        );
     let bindings = bindgen::Builder::default()
         .header(format!("{}/MNN/Tensor.hpp", mnn_inclued_dir.display())) // #
         .header(format!("{}/MNN/Interpreter.hpp", mnn_inclued_dir.display())) //
