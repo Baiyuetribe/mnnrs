@@ -1,6 +1,6 @@
 [package]
 name = "mnnrs"
-version = "0.1.6"
+version = "0.1.0"
 edition = "2021"
 authors = ["baiyue"]
 description = " Rust implementation of mnn, a lightweight neural network inference framework, with separated static library for cross-platform compilation."
