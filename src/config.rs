@@ -59,7 +59,7 @@ impl Default for SessionConfig {
 
 impl SessionConfig {
     // 转换为 C++ 需要的 MNN_ScheduleConfig 和 MNN_BackendConfig
-    pub unsafe fn to_mnn_config(&self) -> MNN_ScheduleConfig {
+    pub fn to_mnn_config(&self) -> MNN_ScheduleConfig {
         let mut backend_config = MNN_BackendConfig {
             memory: match self.memory {
                 Memory::Low => MNN_BackendConfig_MemoryMode_Memory_Low,

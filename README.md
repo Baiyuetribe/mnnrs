@@ -1,91 +1,70 @@
-## MNN-RUST(WIP)
+## MNN-RUST
 
-mnn 的 rust 绑定
+mnn 的 rust 绑定，成功实现 rust 调用。
 
-### 完成度
+### 已完成
 
 - [✅] 加载模型
 - [✅] 参数设置
 - [✅] 推理
 - [✅] 输入、输出
-- [😭] tensor 创建
+- [✅] 预处理及后处理
 
 ### 运行 demo
 
 ```rust
-
-fn main() {
+fn main() -> anyhow::Result<()> {
     let res = mnnrs::version();
     println!("mnnrs version: {}", res);
     let mut net = mnnrs::Net::new();
-    net.load_model("xxx.mnn");
-    println!("加载模型成功");
-    let mut cfg = mnnrs::SessionConfig::default();
-    cfg.forward_type = mnnrs::ForwardType::CPU; // CUDA, OpenCL, OpenGL, Vulkan...
-    cfg.num_threads = 4;
-    cfg.memory = mnnrs::Memory::Low;
-    cfg.power = mnnrs::Power::Normal;
-    cfg.precision = mnnrs::Precision::High;
-    let mnn_cfg = unsafe { cfg.to_mnn_config() };
-    let ex = match net.create_session(&mnn_cfg) {
-        Ok(ex) => ex,
-        Err(e) => {
-            println!("create session failed: {:?}", e);
-            return;
-        }
-    };
-    let mut in0 = net.get_input_tensor(&ex.ptr, "input_image"); // 正确
-    let mut out0 = net.get_output_tensor(&ex.ptr, "output_image"); // 正确
-    let start = std::time::Instant::now();
-    net.run_session(&ex.ptr); // 正式推理，正确
-    println!(
-        "耗时: {:?}",
-        std::time::Instant::now().duration_since(start)
-    );
-    let data: Vec<f32> = vec![0.0; 1 * 255 * 255 * 3]; // 假设有一些数据
+    net.load_model("xxx.mnn")?; // 加载模型
+    let mut opt = mnnrs::SessionConfig::default();
+    opt.forward_type = mnnrs::ForwardType::CPU; // CUDA, OpenCL, OpenGL, Vulkan...
+    opt.num_threads = 4;
+    opt.memory = mnnrs::Memory::Low;
+    opt.power = mnnrs::Power::High;
+    opt.precision = mnnrs::Precision::High;
+    let mnn_cfg = opt.to_mnn_config();
+    let ex = net.create_session(&mnn_cfg); // 创建session
+                                           // 输入和输出创建
+    let mut in0 = net.get_input_tensor(&ex, "image")?; // 输入
+    let mut in1 = net.get_input_tensor(&ex, "mask")?; // 输入
+    let mut out0 = net.get_output_tensor(&ex, "output")?; // 输出
 
-    let nhwc = mnnrs::Tensor::create(
-        vec![1, 255, 255, 3],
-        data.as_ptr() as *mut std::os::raw::c_void,
-        mnnrs::DimensionType::TENSORFLOW,
-    ); // 这一步异常，卡主不动
+    // 预处理
+    let data = [1.460; 1 * 512 * 512 * 1]; // 假设有一些数据
+    in1.set_data(&data);
 
-    println!("运行正常");
+    // 推理
+    net.run_session(&ex); // 正式推理
+
+    // 后处理
+    let ptr_f32 = out0.get_data()?;
+    let res = unsafe { std::slice::from_raw_parts(ptr_f32, data.len()) };
+    println!("{:?}", res);
+
+    println!("推理结束");
+    Ok(())
 }
 
 ```
 
-## 遇到的问题
+### 使用方法
 
-由于 rust 对 c 绑定友好，c++绑定时遇到如下问题，暂时无解，欢迎 pr
-
-经过`bindgen`后，生成如下 rust 代码
-
-```rust
-    pub fn create(
-        shape: Vec<i32>,
-        data: *mut ::std::os::raw::c_void,
-        dim_type: DimensionType,
-    ) -> *mut MNN_Tensor {
-        let halide_type = halide_type_t {
-            code: 2, // 2代表float类型
-            bits: 32,
-            lanes: 1,
-        };
-        let dim_type = match dim_type {
-            DimensionType::TENSORFLOW => MNN_Tensor_DimensionType_TENSORFLOW,
-            DimensionType::CAFFE => MNN_Tensor_DimensionType_CAFFE,
-            DimensionType::CAFFE_C4 => MNN_Tensor_DimensionType_CAFFE_C4,
-        };
-        unsafe {
-            MNN_Tensor_create(
-                shape.as_ptr() as *const u8,
-                halide_type,
-                std::ptr::null_mut(),
-                dim_type,
-            )
-        }
-    }
+```bash
+cargo add mnnrs
+# 然后设置环境变量
+export MNN_INCLUDE_DIR=/path/to/mnn/include
 ```
 
-当前卡在 MNN_Tensor_create 函数调用后，程序卡主。
+用法和我写的 ncnnrs 一样，风格也一样。MNN 的好处是几乎支持 100%的 onnx 模型转换，不像 ncnn 那样几乎 9 成新模型卡在无法转换上。
+
+### 特性
+
+- 使用 rust 开发 MNN
+- 分离静态库，可满足跨端编译要求
+
+### ref
+
+- https://github.com/alibaba/MNN
+- https://github.com/baiyuetribe/ncnnrs

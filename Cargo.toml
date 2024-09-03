@@ -6,6 +6,8 @@ authors = ["baiyue"]
 description = " Rust implementation of mnn, a lightweight neural network inference framework, with separated static library for cross-platform compilation."
 repository = "https://github.com/Baiyuetribe/mnnrs"
 license = "MIT"
+keywords = ["mnn", "mnn_rust", "rust_mnn", "mnnrs"]
+categories = ["api-bindings", "development-tools"]
 exclude = ["demo/*"]
 
 
