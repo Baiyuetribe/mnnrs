@@ -17,7 +17,7 @@ impl Net {
         }
     }
     // 模型加载
-    pub fn load_model(&mut self, model_path: &str) -> anyhow::Result<()> {
+    pub fn load_model(&mut self, path: &str) -> anyhow::Result<()> {
         let c_str = {
             #[cfg(target_os = "windows")]
             {
