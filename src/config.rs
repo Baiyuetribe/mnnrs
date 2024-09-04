@@ -44,6 +44,9 @@ pub struct SessionConfig {
     pub backend_extra: BackendExtra,
 }
 
+unsafe impl Send for SessionConfig {}
+unsafe impl Sync for SessionConfig {}
+
 impl Default for SessionConfig {
     fn default() -> Self {
         SessionConfig {
