@@ -75,10 +75,11 @@ impl Tensor {
     // 复制到外部tensor
 }
 
-impl Drop for Tensor {
-    fn drop(&mut self) {
-        unsafe {
-            MNN_Tensor_destroy(self.ptr);
-        }
-    }
-}
+// 函数内调用会触发segmentation fault，暂时不知道原因
+// impl Drop for Tensor {
+//     fn drop(&mut self) {
+//         unsafe {
+//             MNN_Tensor_destroy(self.ptr);
+//         }
+//     }
+// }
