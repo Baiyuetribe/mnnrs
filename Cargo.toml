@@ -1,6 +1,6 @@
 [package]
 name = "mnnrs"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["baiyue"]
 description = " Rust implementation of mnn, a lightweight neural network inference framework, with separated static library for cross-platform compilation."
@@ -10,20 +10,17 @@ keywords = ["mnn", "mnn_rust", "rust_mnn", "mnnrs"]
 categories = ["api-bindings", "development-tools"]
 exclude = ["demo/*"]
 
-
 [dependencies]
 anyhow = "1.0.86"
 encoding_rs = "0.8.34"
 libc = "0.2.155"
 
-
 [build-dependencies]
 bindgen = "0.69.4"
-
 
 [lints.rust]
 #unsafe_code = "forbid"
 warnings = "allow" # deny, warn, allow, or forbid
 
 [features]
-cpu = [] # 默认启用vulkan，开启此特质将仅使用cpu
+cpu = [] # default

@@ -14,7 +14,7 @@ fn main() {
         .clang_arg(format!("-I{}", mnn_inclued_dir.display())) // 添加这一行
         .clang_arg("-x")
         .clang_arg("c++")
-        .clang_arg("-std=c++11")
+        .clang_arg("-std=c++23")
         .allowlist_type("regex")
         .allowlist_function("MNN.*")
         .allowlist_var("MNN.*")

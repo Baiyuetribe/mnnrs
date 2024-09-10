@@ -1,5 +1,3 @@
-use libc::MEMORY_OBJECT_NULL;
-
 use crate::mnn_bind::*;
 use std::ffi::CString;
 use std::os::raw::c_int;
