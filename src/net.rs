@@ -18,19 +18,12 @@ impl Net {
     }
     // 模型加载
     pub fn load_model(&mut self, path: &str) -> anyhow::Result<()> {
-        let c_str = {
-            #[cfg(target_os = "windows")]
-            {
-                let (gbk_bytes, _, _) = encoding_rs::GB18030.encode(path);
-                CString::new(gbk_bytes)?
-            }
-            #[cfg(not(target_os = "windows"))]
-            {
-                CString::new(path)?
-            }
-        };
+        let c_str = CString::new(path)?; // mnn底层支持utf8编码，Windows无需特殊转换
         unsafe {
             self.ptr = MNN_Interpreter_createFromFile(c_str.as_ptr());
+            if self.ptr.is_null() {
+                anyhow::bail!("Failed to load model");
+            }
         }
         Ok(())
     }

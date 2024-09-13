@@ -19,6 +19,8 @@ fn main() {
         .allowlist_function("MNN.*")
         .allowlist_var("MNN.*")
         .allowlist_type("MNN.*")
+        // 忽略无用类型
+        .blocklist_type("_Base")
         // 生成 Rust 代码中的构造函数
         // .opaque_type("std::.*")
         .opaque_type("std::vector")

@@ -32,7 +32,7 @@ fn main() -> anyhow::Result<()> {
     let mut out0 = net.get_output_tensor(&ex, "output")?; // 输出
 
     // 预处理
-    let data = [1.460; 1 * 512 * 512 * 1]; // 假设有一些数据
+    let data = vec![1.460; 1 * 512 * 512 * 1]; // 假设有一些数据
     in1.set_data(&data);
 
     // 推理
